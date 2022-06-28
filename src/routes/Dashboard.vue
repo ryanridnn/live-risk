@@ -1,6 +1,6 @@
 <script setup>
 import { computed, watchEffect } from "vue";
-import { useConnectionStore } from "../store";
+import { useConnectionStore, useAlertStore } from "../store";
 import { updateParam } from "../connection";
 
 import LineChart from "../components/LineChart.vue";
@@ -8,6 +8,7 @@ import BarChart from "../components/BarChart.vue";
 import Table from "../components/Table.vue";
 
 const connection = useConnectionStore();
+const alert = useAlertStore();
 
 const priceAndRisk = computed(() => connection.dagNodes[1]);
 
@@ -41,6 +42,7 @@ const validateSubmit = (e, callback) => {
 			Number(e.target.value) < -0.05 ||
 			Number(e.target.value) > 0.05
 		) {
+			alert.showAlert("Alert: Insert value between -0.05 and 0.05");
 			return;
 		} else {
 			callback();

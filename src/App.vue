@@ -4,6 +4,8 @@ import { useRoute } from "vue-router";
 import { useConnection } from "./connection/";
 import { CONNECTION_URL } from "./constants";
 
+import Alert from "./components/Alert.vue";
+
 const route = useRoute();
 
 onMounted(() => {
@@ -13,6 +15,7 @@ onMounted(() => {
 
 <template>
 	<div class="container">
+		<Alert />
 		<div class="main">
 			<div class="main__tabs">
 				<router-link
