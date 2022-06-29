@@ -30,6 +30,24 @@ const options = {
 	interaction: {
 		intersect: false,
 	},
+	scales: {
+		y: {
+			ticks: {
+				color: "#bbb",
+			},
+			grid: {
+				color: "#2f2f2f",
+			},
+		},
+		x: {
+			ticks: {
+				color: "#bbb",
+			},
+			grid: {
+				color: "#2f2f2f",
+			},
+		},
+	},
 	plugins: {
 		title: {
 			display: false,
