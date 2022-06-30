@@ -71,7 +71,7 @@ export const updateParam = (
 					type: "param_update",
 					node_ind: nodeIndex,
 					key,
-					value: String(value) + "%",
+					value: String(value / 100),
 				})
 			);
 		} else {
