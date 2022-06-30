@@ -1,14 +1,17 @@
 <script setup>
-import { computed, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import { useConnectionStore, useAlertStore } from "../store";
 import { updateParam } from "../connection";
+import { generateRandomNumber } from "../utils";
 
 import LineChart from "../components/LineChart.vue";
 import BarChart from "../components/BarChart.vue";
 import Table from "../components/Table.vue";
+import RangeInput from "../components/RangeInput.vue";
 
 const connection = useConnectionStore();
 const alert = useAlertStore();
+const randomInputInterval = ref(null);
 
 const priceAndRisk = computed(() => connection.dagNodes[1]);
 
@@ -32,15 +35,11 @@ const risk = computed(
 );
 
 const validateSubmit = (e, callback) => {
-	if (
-		e.code === "Enter" &&
-		e.target.value !== "" &&
-		!!Number(e.target.value)
-	) {
+	if (e.target.value !== "" && !!Number(e.target.value)) {
 		if (
 			!Number(e.target.value) ||
-			Number(e.target.value) < -0.05 ||
-			Number(e.target.value) > 0.05
+			Number(e.target.value) < -3 ||
+			Number(e.target.value) > 3
 		) {
 			alert.showAlert("Alert: Insert value between -0.05 and 0.05");
 			return;
@@ -52,8 +51,20 @@ const validateSubmit = (e, callback) => {
 
 const handleUpdate = (e, key) => {
 	validateSubmit(e, () => {
-		updateParam(1, key, e.target.value);
+		updateParam(1, key, Number(e.target.value), true);
 	});
+};
+
+const onRandomInput = (e) => {
+	if (e.target.checked) {
+		randomInputInterval.value = setInterval(() => {
+			updateParam(1, "parallel_shift", generateRandomNumber(-3, 3), true);
+			updateParam(1, "parallel_tilt", generateRandomNumber(-3, 3), true);
+			updateParam(1, "parallel_twist", generateRandomNumber(-3, 3), true);
+		}, 2000);
+	} else {
+		clearInterval(randomInputInterval.value);
+	}
 };
 </script>
 
@@ -73,6 +84,7 @@ const handleUpdate = (e, key) => {
 							type="checkbox"
 							class="toggle__checkbox"
 							id="randomMarketData"
+							@input="onRandomInput"
 						/>
 						<label for="randomMarketData" class="toggle__wrapper">
 							<div class="toggle__circle"></div>
@@ -81,60 +93,59 @@ const handleUpdate = (e, key) => {
 				</div>
 				<div class="dashboard__input input">
 					<label for="parallelShift" class="dashboard__label"
-						>Paralllel Shift</label
+						>Parallel Shift</label
 					>
-					<input
-						type="number"
-						class="dashboard__field"
-						id="parallelShift"
+					<RangeInput
+						:onInput="(e) => handleUpdate(e, 'parallel_shift')"
+						:options="{ min: -3, max: 3, step: 0.005 }"
 						:value="
 							priceAndRisk &&
 							priceAndRisk.input_params.parallel_shift
 						"
-						@keydown="(e) => handleUpdate(e, 'parallel_shift')"
 					/>
 				</div>
 				<div class="dashboard__input input">
 					<label for="parallelTilt" class="dashboard__label"
-						>Paralllel Tilt</label
+						>Parallel Tilt</label
 					>
-					<input
-						type="number"
-						class="dashboard__field"
-						id="parallelTilt"
+					<RangeInput
+						:onInput="(e) => handleUpdate(e, 'parallel_tilt')"
+						:options="{ min: -3, max: 3, step: 0.005 }"
 						:value="
 							priceAndRisk &&
 							priceAndRisk.input_params.parallel_tilt
 						"
-						@keydown="(e) => handleUpdate(e, 'parallel_tilt')"
 					/>
 				</div>
 				<div class="dashboard__input input">
 					<label for="parallelTwist" class="dashboard__label"
-						>Paralllel Twist</label
+						>Parallel Twist</label
 					>
-					<input
-						type="number"
-						class="dashboard__field"
-						id="parallelTwist"
+					<RangeInput
+						:onInput="(e) => handleUpdate(e, 'parallel_twist')"
+						:options="{ min: -3, max: 3, step: 0.005 }"
 						:value="
 							priceAndRisk &&
 							priceAndRisk.input_params.parallel_twist
 						"
-						@keydown="(e) => handleUpdate(e, 'parallel_twist')"
 					/>
 				</div>
 			</div>
 		</div>
 		<div class="dashboard__bottom">
-			<LineChart label="Market Rates" :content="marketRates" />
-			<LineChart label="Fitted Values" :content="fittedValues" />
-			<BarChart label="Risk Graph" :content="risk" />
-			<Table
-				label="Risk Table"
-				:content="risk"
-				:options="{ keyAndValue: true, headings: ['Key', 'Value'] }"
-			/>
+			<div class="dashboard__outputs">
+				<LineChart label="Market Rates" :content="marketRates" />
+				<LineChart label="Fitted Values" :content="fittedValues" />
+			</div>
+			<div class="dashboard__outputs">
+				<BarChart label="Risk Graph" :content="risk" />
+				<Table
+					label="Risk Table"
+					:content="risk"
+					:options="{ keyAndValue: true, headings: ['Key', 'Value'] }"
+					:maxHeight="440"
+				/>
+			</div>
 		</div>
 	</div>
 </template>
@@ -158,12 +169,13 @@ const handleUpdate = (e, key) => {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		width: 480px;
+		width: 640px;
+		padding: 0.25rem;
 	}
 
 	&__toggle-group {
 		.toggle {
-			width: 230px;
+			width: 400px;
 		}
 	}
 
@@ -186,7 +198,17 @@ const handleUpdate = (e, key) => {
 		margin-top: 2.5rem;
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: 3rem;
+	}
+
+	&__outputs {
+		display: flex;
+		max-width: 100%;
+		gap: 3rem;
+
+		& > * {
+			flex: 1;
+		}
 	}
 }
 

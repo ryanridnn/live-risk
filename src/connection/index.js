@@ -19,6 +19,7 @@ export const useConnection = (url) => {
 	const on_close = () => {
 		connection.setWs(null);
 		connection.setConnected(false);
+		console.log("close");
 	};
 
 	const on_message = (message) => {
@@ -53,20 +54,37 @@ export const disconnect = () => {
 	connection.ws.close();
 };
 
-export const updateParam = (nodeIndex, key, value) => {
+export const updateParam = (
+	nodeIndex,
+	key,
+	value,
+	isValuePercentage = false
+) => {
 	const connection = useConnectionStore();
 
 	if (!connection.connected) {
 		return;
 	} else {
-		connection.ws.send(
-			JSON.stringify({
-				type: "param_update",
-				node_ind: nodeIndex,
-				key,
-				value: String(value),
-			})
-		);
+		if (isValuePercentage) {
+			connection.ws.send(
+				JSON.stringify({
+					type: "param_update",
+					node_ind: nodeIndex,
+					key,
+					value: String(value) + "%",
+				})
+			);
+		} else {
+			connection.ws.send(
+				JSON.stringify({
+					type: "param_update",
+					node_ind: nodeIndex,
+					key,
+					value: String(value),
+				})
+			);
+		}
+
 		const params = {};
 
 		params[key] = value;

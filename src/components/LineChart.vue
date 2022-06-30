@@ -63,7 +63,7 @@ const options = {
 		<h3 class="heading">
 			{{ props.label }}
 		</h3>
-		<Line :chart-data="chartData" :chart-options="options" :height="200" />
+		<Line :height="300" :chart-data="chartData" :chart-options="options" />
 	</div>
 </template>
 

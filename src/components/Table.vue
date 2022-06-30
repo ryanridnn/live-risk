@@ -4,6 +4,10 @@ import { defineProps, computed } from "vue ";
 const props = defineProps({
 	label: String,
 	content: [Array, Object],
+	maxHeight: {
+		type: Number,
+		default: 600,
+	},
 	options: {
 		type: Object,
 		default: {
@@ -30,7 +34,10 @@ const tableHeadings = computed(() => {
 		class="table"
 	>
 		<h3 class="heading">{{ props.label }}</h3>
-		<table class="table__element">
+		<table
+			class="table__element"
+			:style="{ 'max-height': props.maxHeight + 'px' }"
+		>
 			<tr class="table__row table__row-heading">
 				<th
 					v-for="heading in tableHeadings"
@@ -68,7 +75,6 @@ const tableHeadings = computed(() => {
 		color: #222;
 		border-radius: 0.75rem;
 		overflow-y: auto;
-		max-height: 600px;
 		position: relative;
 		font-size: 0.875rem;
 	}
@@ -97,7 +103,7 @@ const tableHeadings = computed(() => {
 	}
 
 	&__data {
-		background: rgb(30 41 59);
+		// background: rgb(30 41 59);
 		color: white;
 	}
 
