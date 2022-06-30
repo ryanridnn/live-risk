@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watchEffect } from "vue";
+import { computed, ref, watchEffect, onUnmounted } from "vue";
 import { useConnectionStore, useAlertStore } from "../store";
 import { updateParam } from "../connection";
 import { generateRandomNumber } from "../utils";
@@ -66,6 +66,10 @@ const onRandomInput = (e) => {
 		clearInterval(randomInputInterval.value);
 	}
 };
+
+onUnmounted(() => {
+	clearInterval(randomInputInterval.value);
+});
 </script>
 
 <template>
