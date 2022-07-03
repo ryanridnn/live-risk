@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watchEffect, onUnmounted } from "vue";
+import { computed, ref, onUnmounted } from "vue";
 import { useConnectionStore, useAlertStore } from "../store";
 import { updateParam } from "../connection";
 import { generateRandomNumber } from "../utils";
@@ -32,6 +32,12 @@ const fittedValues = computed(
 const risk = computed(
 	() =>
 		(priceAndRisk.value ? priceAndRisk.value.output_params.Risk : []) || []
+);
+
+const currentValuationTime = computed(
+	() =>
+		(priceAndRisk.value ? priceAndRisk.value.output_params.CalcTime : 0) ||
+		0
 );
 
 const validateSubmit = (e, callback) => {
@@ -136,7 +142,28 @@ onUnmounted(() => {
 				</div>
 			</div>
 		</div>
-		<div class="dashboard__bottom">
+		<div
+			class="dashboard__bottom"
+			v-if="
+				priceAndRisk &&
+				priceAndRisk.output_params &&
+				Object.keys(risk).length > 0 &&
+				Object.keys(marketRates).length > 0 &&
+				Object.keys(fittedValues).length > 0
+			"
+		>
+			<div class="dashboard__readonlies">
+				<div class="dashboard__readonly readonly">
+					<div class="readonly__label">Current valuation time</div>
+					<div class="readonly__value">
+						{{ currentValuationTime.toFixed(2) }}ms
+					</div>
+				</div>
+				<div class="dashboard__readonly readonly">
+					<div class="readonly__label">Average valuation time</div>
+					<div class="readonly__value">0.02ms</div>
+				</div>
+			</div>
 			<div class="dashboard__outputs">
 				<LineChart label="Market Rates" :content="marketRates" />
 				<LineChart label="Fitted Values" :content="fittedValues" />
@@ -147,7 +174,7 @@ onUnmounted(() => {
 					label="Risk Table"
 					:content="risk"
 					:options="{ keyAndValue: true, headings: ['Key', 'Value'] }"
-					:maxHeight="440"
+					:maxHeight="380"
 				/>
 			</div>
 		</div>
@@ -205,6 +232,17 @@ onUnmounted(() => {
 		gap: 3rem;
 	}
 
+	&__readonlies {
+		display: flex;
+		border: 2px dashed rgb(71 85 105);
+		padding: 1.5rem;
+		border-radius: 1rem;
+	}
+
+	&__readonly {
+		flex: 1;
+	}
+
 	&__outputs {
 		display: flex;
 		max-width: 100%;
@@ -213,6 +251,21 @@ onUnmounted(() => {
 		& > * {
 			flex: 1;
 		}
+	}
+}
+
+.readonly {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 0.75rem;
+
+	&__value {
+		background: rgb(251, 191, 36);
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		font-weight: bold;
+		color: rgb(30, 41, 59);
 	}
 }
 

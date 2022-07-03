@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useConnectionStore } from "../store";
 import { validateSubmit } from "../utils";
 import { updateParam } from "../connection";
@@ -7,6 +7,8 @@ import { updateParam } from "../connection";
 import Table from "../components/Table.vue";
 
 const connection = useConnectionStore();
+
+const timeout = ref(null);
 
 const portfolio = computed(() => connection.dagNodes[0]);
 
@@ -19,6 +21,13 @@ const handleUpdate = (e, key) => {
 		updateParam(0, key, e.target.value);
 	});
 };
+
+const progress = computed(() => connection.dagNodesProgress[0] || 0);
+const status = computed(() => connection.dagNodesStatus[0]);
+
+const progressStyle = computed(() => ({
+	width: progress.value * 100 + "%",
+}));
 </script>
 
 <template>
@@ -53,6 +62,17 @@ const handleUpdate = (e, key) => {
 			</div>
 		</div>
 		<div class="portfolio__bottom">
+			<div class="portfolio__output">
+				<h3 class="heading">Kernel Creation</h3>
+				<div class="portfolio__progress progress">
+					<div class="progress__text">
+						{{
+							progress === 1 ? 100 : (progress * 100).toFixed(2)
+						}}% Complete
+					</div>
+					<div :style="progressStyle" class="progress__bar"></div>
+				</div>
+			</div>
 			<Table label="Trades" :content="trades" />
 		</div>
 	</div>
@@ -97,6 +117,43 @@ const handleUpdate = (e, key) => {
 
 	&__bottom {
 		margin-top: 2.5rem;
+	}
+
+	&__output {
+		margin-bottom: 2rem;
+	}
+}
+
+h3.heading {
+	margin-bottom: 1.25rem;
+}
+
+.progress {
+	height: 2.5rem;
+	background: rgb(240, 152, 5);
+	border-radius: 0.5rem;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+
+	&__text {
+		position: relative;
+		z-index: 1;
+		color: rgb(30, 41, 59);
+		font-weight: bold;
+	}
+
+	&__bar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		background: rgb(251, 191, 36);
+		border-top-right-radius: 0.375rem;
+		border-bottom-right-radius: 0.375rem;
+		transition: all 0.2s ease;
 	}
 }
 </style>
