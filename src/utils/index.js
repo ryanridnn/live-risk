@@ -10,7 +10,7 @@ export const validateSubmit = (e, callback) => {
 	if (
 		e.code === "Enter" &&
 		e.target.value !== "" &&
-		!!Number(e.target.value)
+		!isNaN(Number(e.target.value))
 	) {
 		callback();
 	}

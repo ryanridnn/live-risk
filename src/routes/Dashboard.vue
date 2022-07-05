@@ -43,7 +43,7 @@ const currentValuationTime = computed(
 const validateSubmit = (e, callback) => {
 	if (e.target.value !== "" && !!Number(e.target.value)) {
 		if (
-			!Number(e.target.value) ||
+			isNaN(Number(e.target.value)) ||
 			Number(e.target.value) < -3 ||
 			Number(e.target.value) > 3
 		) {
