@@ -3,7 +3,7 @@ import { defineProps, watch, watchEffect, ref, computed } from "vue";
 import { useDebounced } from "../utils";
 
 const rangeInputEl = ref(null);
-const tooltipContentEl = ref(null);
+const valueEl = ref(null);
 const rangeInputValue = ref(0.5);
 
 const debouncedSliderInput = useDebounced();
@@ -27,41 +27,58 @@ const onInput = (e) => {
 };
 
 watchEffect(() => {
-	if (tooltipContentEl.value) {
-		tooltipContentEl.value.textContent =
+	if (valueEl.value) {
+		valueEl.value.textContent =
 			Number(rangeInputValue.value).toFixed(2) + "%";
 	}
 });
 
 watchEffect(() => {
-	if (tooltipContentEl.value) {
-		tooltipContentEl.value.textContent =
-			Number(props.value).toFixed(2) + "%";
+	if (valueEl.value) {
+		valueEl.value.textContent = Number(props.value).toFixed(2) + "%";
 	}
 });
 </script>
 
 <template>
 	<div class="range">
-		<div class="tooltip tooltip--min">{{ props.options.min }}%</div>
-		<div ref="tooltipContentEl" class="tooltip tooltip--center"></div>
-		<input
-			ref="rangeInputEl"
-			type="range"
-			:min="props.options.min"
-			:max="props.options.max"
-			:step="props.options.step"
-			:value="props.value"
-			@input="onInput"
-			class="range__input"
-		/>
-		<div class="tooltip tooltip--max">{{ props.options.max }}%</div>
+		<div class="range__inner">
+			<div class="tooltip tooltip--min">{{ props.options.min }}%</div>
+			<!-- <div ref="tooltipContentEl" class="tooltip tooltip--center"></div> -->
+			<input
+				ref="rangeInputEl"
+				type="range"
+				:min="props.options.min"
+				:max="props.options.max"
+				:step="props.options.step"
+				:value="props.value"
+				@input="onInput"
+				class="range__input"
+			/>
+			<div class="tooltip tooltip--max">{{ props.options.max }}%</div>
+		</div>
+		<div ref="valueEl" class="range__value">{{}}</div>
 	</div>
 </template>
 
 <style lang="scss">
 .range {
-	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+
+	&__inner {
+		position: relative;
+	}
+
+	&__value {
+		width: 2.5rem;
+		border-radius: 0.25rem;
+		padding: 0.25rem 0;
+		font-size: 0.875rem;
+		text-align: center;
+		font-weight: medium;
+	}
 
 	.tooltip {
 		position: absolute;
@@ -134,7 +151,7 @@ watchEffect(() => {
 	&__input {
 		display: block;
 		appearance: none;
-		width: 400px;
+		width: 342px;
 		height: 0.75rem;
 		border-radius: 2rem;
 		background: rgb(51, 65, 85);

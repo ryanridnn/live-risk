@@ -40,6 +40,13 @@ const currentValuationTime = computed(
 		0
 );
 
+const portfolioNPV = computed(
+	() =>
+		(priceAndRisk.value
+			? priceAndRisk.value.output_params.PortfolioNPV
+			: 0) || 0
+);
+
 const validateSubmit = (e, callback) => {
 	if (e.target.value !== "" && !!Number(e.target.value)) {
 		if (
@@ -63,6 +70,10 @@ const handleUpdate = (e, key) => {
 
 const onRandomInput = (e) => {
 	if (e.target.checked) {
+		updateParam(1, "parallel_shift", generateRandomNumber(-3, 3), true);
+		updateParam(1, "parallel_tilt", generateRandomNumber(-3, 3), true);
+		updateParam(1, "parallel_twist", generateRandomNumber(-3, 3), true);
+
 		randomInputInterval.value = setInterval(() => {
 			updateParam(1, "parallel_shift", generateRandomNumber(-3, 3), true);
 			updateParam(1, "parallel_tilt", generateRandomNumber(-3, 3), true);
@@ -154,14 +165,16 @@ onUnmounted(() => {
 		>
 			<div class="dashboard__readonlies">
 				<div class="dashboard__readonly readonly">
+					<div class="readonly__label">PortfolioNPV</div>
+					<div class="readonly__value">
+						{{ portfolioNPV.toFixed(2) }}ms
+					</div>
+				</div>
+				<div class="dashboard__readonly readonly">
 					<div class="readonly__label">Current valuation time</div>
 					<div class="readonly__value">
 						{{ currentValuationTime.toFixed(2) }}ms
 					</div>
-				</div>
-				<div class="dashboard__readonly readonly">
-					<div class="readonly__label">Average valuation time</div>
-					<div class="readonly__value">0.02ms</div>
 				</div>
 			</div>
 			<div class="dashboard__outputs">
