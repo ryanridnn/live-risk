@@ -121,9 +121,16 @@ const processMessage = (message) => {
 		const data = convertData(message);
 
 		if (data.type === "progress") {
+			if (!connection.loadComplete && data.node_ind === 1) {
+				connection.setInitialLoadProgress(data.progress);
+			}
 			connection.setStatus(data.node_ind, STATUS.IN_PROGRESS);
 			connection.setProgress(data.node_ind, data.progress);
 		} else if (data.type === "completed") {
+			if (!connection.loadComplete && data.node_ind === 1) {
+				connection.setInitialLoadProgress(1);
+				connection.setLoadComplete(true);
+			}
 			connection.setStatus(data.node_ind, STATUS.COMPLETED);
 			connection.setProgress(data.node_ind, 1);
 			connection.setDagNodesOutput(data.results, data.node_ind);

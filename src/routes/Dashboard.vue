@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onUnmounted } from "vue";
+import { computed, ref, onUnmounted, watchEffect } from "vue";
 import { useConnectionStore, useAlertStore } from "../store";
 import { updateParam } from "../connection";
 import { generateRandomNumber } from "../utils";
@@ -11,20 +11,33 @@ import RangeInput from "../components/RangeInput.vue";
 
 const connection = useConnectionStore();
 const alert = useAlertStore();
+const isRandomDataOn = ref(connection.randomizeData);
 const randomInputInterval = ref(null);
 
 const priceAndRisk = computed(() => connection.dagNodes[1]);
 const portfolio = computed(() => connection.dagNodes[0]);
 
 const marketRates = computed(() => {
-	let marketRates = {};
-	if (priceAndRisk.value && priceAndRisk.value.output_params.MarketRates) {
+	if (
+		priceAndRisk.value &&
+		portfolio.value &&
+		priceAndRisk.value.output_params.MarketRates &&
+		portfolio.value.output_params.OriginalMarketRates
+	) {
+		let currentMarketRates = {};
+		let originalMarketRates = {};
+
 		priceAndRisk.value.output_params.MarketRates.map((arr) => {
-			marketRates[arr[0]] = arr[1];
+			currentMarketRates[arr[0]] = arr[1];
 		});
-		return marketRates;
+
+		portfolio.value.output_params.OriginalMarketRates.map((arr) => {
+			originalMarketRates[arr[0]] = arr[1];
+		});
+
+		return [currentMarketRates, originalMarketRates];
 	} else {
-		return marketRates;
+		return [];
 	}
 });
 
@@ -60,17 +73,25 @@ const risk = computed(() => {
 	);
 });
 
+const portfolioNPV = computed(
+	() =>
+		(priceAndRisk.value
+			? priceAndRisk.value.output_params.PortfolioNPV
+			: 0) || 0
+);
+
 const currentValuationTime = computed(
 	() =>
 		(priceAndRisk.value ? priceAndRisk.value.output_params.CalcTime : 0) ||
 		0
 );
 
-const portfolioNPV = computed(
-	() =>
-		(priceAndRisk.value
-			? priceAndRisk.value.output_params.PortfolioNPV
-			: 0) || 0
+const irSwaps = computed(
+	() => (portfolio.value ? portfolio.value.input_params.NumTrades : 0) || 0
+);
+
+const portfolioLoadTime = computed(
+	() => (portfolio.value ? portfolio.value.output_params.CalcTime : 0) || 0
 );
 
 const tradesNPV = computed(() => {
@@ -113,7 +134,16 @@ const handleUpdate = (e, key) => {
 };
 
 const onRandomInput = (e) => {
-	if (e.target.checked) {
+	connection.setRandomizeData(!connection.randomizeData);
+};
+
+onUnmounted(() => {
+	clearInterval(randomInputInterval.value);
+});
+
+watchEffect(() => {
+	if (connection.randomizeData) {
+		clearInterval(randomInputInterval.value);
 		updateParam(1, "parallel_shift", generateRandomNumber(-3, 3), true);
 		updateParam(1, "parallel_tilt", generateRandomNumber(-3, 3), true);
 		updateParam(1, "parallel_twist", generateRandomNumber(-3, 3), true);
@@ -126,10 +156,6 @@ const onRandomInput = (e) => {
 	} else {
 		clearInterval(randomInputInterval.value);
 	}
-};
-
-onUnmounted(() => {
-	clearInterval(randomInputInterval.value);
 });
 </script>
 
@@ -147,6 +173,7 @@ onUnmounted(() => {
 					<div class="toggle">
 						<input
 							type="checkbox"
+							v-model="isRandomDataOn"
 							class="toggle__checkbox"
 							id="randomMarketData"
 							@input="onRandomInput"
@@ -214,15 +241,40 @@ onUnmounted(() => {
 						{{ portfolioNPV.toFixed(2) }}
 					</div>
 				</div>
+				<div
+					class="dashboard__readonly readonly dashboard__readonly--small"
+				>
+					<div class="readonly__label">IR SWAPS</div>
+					<div class="readonly__value">
+						{{ irSwaps }}
+					</div>
+				</div>
 				<div class="dashboard__readonly readonly">
 					<div class="readonly__label">Current valuation time</div>
 					<div class="readonly__value">
 						{{ currentValuationTime.toFixed(2) }}ms
 					</div>
 				</div>
+				<div class="dashboard__readonly readonly">
+					<div class="readonly__label">Portfolio Load Time</div>
+					<div class="readonly__value">
+						{{ portfolioLoadTime.toFixed(2) }}ms
+					</div>
+				</div>
 			</div>
 			<div class="dashboard__outputs">
-				<LineChart label="Market Rates" :content="[marketRates]" />
+				<LineChart
+					label="Market Rates"
+					:content="marketRates"
+					:options="{
+						showLabel: true,
+						labels: [
+							'Current Market Rates',
+							'Original Market Rates',
+						],
+					}"
+					:colors="['rgb(52 211 153)', 'rgb(148 163 184)']"
+				/>
 				<LineChart
 					label="Fitted Values"
 					:content="fittedValues"
@@ -299,13 +351,17 @@ onUnmounted(() => {
 
 	&__readonlies {
 		display: flex;
+		justify-content: center;
 		border: 2px dashed rgb(71 85 105);
 		padding: 1.5rem;
 		border-radius: 1rem;
 	}
 
 	&__readonly {
-		flex: 1;
+		flex: 2.5;
+		&--small {
+			flex: 1;
+		}
 	}
 
 	&__outputs {

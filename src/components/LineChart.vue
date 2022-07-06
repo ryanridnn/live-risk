@@ -40,6 +40,7 @@ const options = {
 	responsive: true,
 	interaction: {
 		intersect: false,
+		mode: "index",
 	},
 	scales: {
 		y: {

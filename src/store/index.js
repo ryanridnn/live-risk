@@ -5,10 +5,13 @@ export const useConnectionStore = defineStore("connectionStore", {
 		return {
 			ws: null,
 			connected: false,
+			loadComplete: false,
+			initialLoadProgress: 0,
 			dagNodes: [],
 			dagNodesStatus: [],
 			dagNodesProgress: [],
 			gotInitial: false,
+			randomizeData: true,
 		};
 	},
 	actions: {
@@ -38,6 +41,15 @@ export const useConnectionStore = defineStore("connectionStore", {
 		},
 		setProgress(nodeIndex, progress) {
 			this.dagNodesProgress[nodeIndex] = progress;
+		},
+		setLoadComplete(bool) {
+			this.loadComplete = bool;
+		},
+		setInitialLoadProgress(progress) {
+			this.initialLoadProgress = progress;
+		},
+		setRandomizeData(bool) {
+			this.randomizeData = bool;
 		},
 	},
 	getters: {

@@ -1,13 +1,25 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useConnectionStore } from "./store";
 import { useConnection } from "./connection/";
 import { CONNECTION_URL, MENUS } from "./constants";
 
 import Alert from "./components/Alert.vue";
+import LoadingPopup from "./components/LoadingPopup.vue";
 import Dashboard from "./routes/Dashboard.vue";
 import Portfolio from "./routes/Portfolio.vue";
 
+const connection = useConnectionStore();
+
 const currentMenu = ref(MENUS.DASHBOARD);
+
+const isLoaded = computed(() => {
+	if (connection.loadComplete) {
+		return true;
+	} else {
+		return false;
+	}
+});
 
 onMounted(() => {
 	useConnection(CONNECTION_URL);
@@ -21,7 +33,8 @@ const selectMenu = (menu) => {
 <template>
 	<div class="container">
 		<Alert />
-		<div class="main">
+		<LoadingPopup :show="!isLoaded" />
+		<div v-if="isLoaded" class="main">
 			<div class="main__tabs">
 				<button
 					v-for="menu in Object.keys(MENUS)"

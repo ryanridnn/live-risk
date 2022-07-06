@@ -4,6 +4,7 @@ export const CONNECTION_URL =
 export const MENUS = {
 	DASHBOARD: "Dashboard",
 	PORTFOLIO: "Portfolio",
+	// SETTINGS: 'Settings'
 };
 
 export const STATUS = {
