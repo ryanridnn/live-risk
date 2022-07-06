@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onUnmounted, watchEffect } from "vue";
+import { computed, ref, onUnmounted } from "vue";
 import { useConnectionStore, useAlertStore } from "../store";
 import { updateParam } from "../connection";
 import { generateRandomNumber } from "../utils";
@@ -52,7 +52,6 @@ const risk = computed(() => {
 			risk[arr[0]] = arr[1];
 		});
 		return risk;
-		// return priceAndRisk.value.output_params.Risk;
 	} else {
 		return risk;
 	}
@@ -132,10 +131,6 @@ const onRandomInput = (e) => {
 
 onUnmounted(() => {
 	clearInterval(randomInputInterval.value);
-});
-
-watchEffect(() => {
-	// console.log(priceAndRisk.value.output_params.fitted_values_discount);
 });
 </script>
 
