@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onUnmounted } from "vue";
+import { computed, ref, onUnmounted, watchEffect } from "vue";
 import { useConnectionStore, useAlertStore } from "../store";
 import { updateParam } from "../connection";
 import { generateRandomNumber } from "../utils";
@@ -14,25 +14,53 @@ const alert = useAlertStore();
 const randomInputInterval = ref(null);
 
 const priceAndRisk = computed(() => connection.dagNodes[1]);
+const portfolio = computed(() => connection.dagNodes[0]);
 
-const marketRates = computed(
-	() =>
-		(priceAndRisk.value
-			? priceAndRisk.value.output_params.MarketRates
-			: {}) || {}
-);
+const marketRates = computed(() => {
+	let marketRates = {};
+	if (priceAndRisk.value && priceAndRisk.value.output_params.MarketRates) {
+		priceAndRisk.value.output_params.MarketRates.map((arr) => {
+			marketRates[arr[0]] = arr[1];
+		});
+		return marketRates;
+		// return priceAndRisk.value.output_params.MarketRates;
+	} else {
+		return marketRates;
+	}
+});
 
-const fittedValues = computed(
-	() =>
-		(priceAndRisk.value
-			? priceAndRisk.value.output_params.fitted_values
-			: []) || []
-);
+const fittedValues = computed(() => {
+	if (
+		priceAndRisk.value &&
+		priceAndRisk.value.output_params.fitted_values_forecast &&
+		priceAndRisk.value.output_params.fitted_values_discount
+	) {
+		return [
+			priceAndRisk.value.output_params.fitted_values_forecast,
+			priceAndRisk.value.output_params.fitted_values_discount,
+		];
+	} else {
+		return [];
+	}
+});
 
-const risk = computed(
-	() =>
+const risk = computed(() => {
+	let risk = {};
+
+	if (priceAndRisk.value && priceAndRisk.value.output_params.Risk) {
+		priceAndRisk.value.output_params.Risk.map((arr) => {
+			risk[arr[0]] = arr[1];
+		});
+		return risk;
+		// return priceAndRisk.value.output_params.Risk;
+	} else {
+		return risk;
+	}
+
+	return (
 		(priceAndRisk.value ? priceAndRisk.value.output_params.Risk : []) || []
-);
+	);
+});
 
 const currentValuationTime = computed(
 	() =>
@@ -46,6 +74,24 @@ const portfolioNPV = computed(
 			? priceAndRisk.value.output_params.PortfolioNPV
 			: 0) || 0
 );
+
+const tradesNPV = computed(() => {
+	if (
+		portfolio.value &&
+		priceAndRisk.value &&
+		portfolio.value.output_params.Trades &&
+		priceAndRisk.value.output_params.TradeNPV
+	) {
+		let tradesNPV = priceAndRisk.value.output_params.TradeNPV.map(
+			(npv, index) => {
+				return { ...portfolio.value.output_params.Trades[index], npv };
+			}
+		);
+		return tradesNPV;
+	} else {
+		return [];
+	}
+});
 
 const validateSubmit = (e, callback) => {
 	if (e.target.value !== "" && !!Number(e.target.value)) {
@@ -86,6 +132,10 @@ const onRandomInput = (e) => {
 
 onUnmounted(() => {
 	clearInterval(randomInputInterval.value);
+});
+
+watchEffect(() => {
+	// console.log(priceAndRisk.value.output_params.fitted_values_discount);
 });
 </script>
 
@@ -178,8 +228,15 @@ onUnmounted(() => {
 				</div>
 			</div>
 			<div class="dashboard__outputs">
-				<LineChart label="Market Rates" :content="marketRates" />
-				<LineChart label="Fitted Values" :content="fittedValues" />
+				<LineChart label="Market Rates" :content="[marketRates]" />
+				<LineChart
+					label="Fitted Values"
+					:content="fittedValues"
+					:options="{
+						showLabel: true,
+						labels: ['Forecast', 'Discount'],
+					}"
+				/>
 			</div>
 			<div class="dashboard__outputs">
 				<BarChart label="Risk Graph" :content="risk" />
@@ -190,6 +247,7 @@ onUnmounted(() => {
 					:maxHeight="380"
 				/>
 			</div>
+			<Table label="TradesNPV" :content="tradesNPV" />
 		</div>
 	</div>
 </template>

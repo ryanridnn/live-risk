@@ -8,19 +8,31 @@ ChartJS.register(...registerables);
 
 const props = defineProps({
 	label: String,
-	content: Object,
+	content: Array,
+	options: {
+		type: Object,
+		default: {
+			showLabel: false,
+			labels: [],
+		},
+	},
+	colors: {
+		type: Array,
+		default: ["rgb(52 211 153)", "rgb(217 70 239)"],
+	},
 });
 
 const chartData = computed(() => {
 	return {
-		labels: Object.keys(props.content),
-		datasets: [
-			{
-				data: Object.values(props.content),
-				borderColor: "rgb(52 211 153)",
+		labels: Object.keys(props.content[0]),
+		datasets: props.content.map((cont, index) => {
+			return {
+				label: props.options.labels[index],
+				data: Object.values(cont),
+				borderColor: props.colors[index % props.colors.length],
 				lineTension: 0.6,
-			},
-		],
+			};
+		}),
 	};
 });
 
@@ -52,7 +64,12 @@ const options = {
 			display: false,
 		},
 		legend: {
-			display: false,
+			position: "bottom",
+			display: props.options.showLabel,
+			labels: {
+				color: "#ddd",
+			},
+			boxHeight: 200,
 		},
 	},
 };
