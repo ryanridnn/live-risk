@@ -121,7 +121,7 @@ const processMessage = (message) => {
 		const data = convertData(message);
 
 		if (data.type === "progress") {
-			if (!connection.loadComplete && data.node_ind === 1) {
+			if (!connection.loadComplete && data.node_ind === 0) {
 				connection.setInitialLoadProgress(data.progress);
 			}
 			connection.setStatus(data.node_ind, STATUS.IN_PROGRESS);

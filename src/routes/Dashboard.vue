@@ -358,7 +358,7 @@ watchEffect(() => {
 	}
 
 	&__readonly {
-		flex: 2.5;
+		flex: 2;
 		&--small {
 			flex: 1;
 		}
