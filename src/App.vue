@@ -1,16 +1,21 @@
 <script setup>
-import { onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
 import { useConnection } from "./connection/";
-import { CONNECTION_URL } from "./constants";
+import { CONNECTION_URL, MENUS } from "./constants";
 
 import Alert from "./components/Alert.vue";
+import Dashboard from "./routes/Dashboard.vue";
+import Portfolio from "./routes/Portfolio.vue";
 
-const route = useRoute();
+const currentMenu = ref(MENUS.DASHBOARD);
 
 onMounted(() => {
 	useConnection(CONNECTION_URL);
 });
+
+const selectMenu = (menu) => {
+	currentMenu.value = menu;
+};
 </script>
 
 <template>
@@ -18,29 +23,20 @@ onMounted(() => {
 		<Alert />
 		<div class="main">
 			<div class="main__tabs">
-				<router-link
-					to="/"
-					class="main__tab"
-					:class="{ 'main__tab--active': route.path === '/' }"
-					>Dashboard</router-link
-				>
-				<router-link
-					to="/portfolio"
+				<button
+					v-for="menu in Object.keys(MENUS)"
+					@click="selectMenu(MENUS[menu])"
 					class="main__tab"
 					:class="{
-						'main__tab--active': route.path === '/portfolio',
+						'main__tab--active': MENUS[menu] === currentMenu,
 					}"
-					>Portfolio</router-link
 				>
-				<router-link
-					to="/settings"
-					class="main__tab"
-					:class="{ 'main__tab--active': route.path === '/settings' }"
-					>Settings</router-link
-				>
+					{{ MENUS[menu] }}
+				</button>
 			</div>
 			<div class="main__view">
-				<router-view></router-view>
+				<Dashboard v-if="currentMenu === MENUS.DASHBOARD" />
+				<Portfolio v-if="currentMenu === MENUS.PORTFOLIO" />
 			</div>
 		</div>
 	</div>
@@ -72,6 +68,7 @@ onMounted(() => {
 		padding: 0.5rem 0.75rem;
 		color: white;
 		border-radius: 0.25rem;
+		font-size: 1rem;
 
 		&--active {
 			background: rgba(251, 191, 36, 1);

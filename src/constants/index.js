@@ -1,6 +1,11 @@
 export const CONNECTION_URL =
 	"wss://dev.matlogica.com/live-risk-zu9poh7Queeshae9tha3/";
 
+export const MENUS = {
+	DASHBOARD: "Dashboard",
+	PORTFOLIO: "Portfolio",
+};
+
 export const STATUS = {
 	NOT_READY: "Not Ready",
 	IN_PROGRESS: "In Progress",

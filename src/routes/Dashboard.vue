@@ -23,7 +23,6 @@ const marketRates = computed(() => {
 			marketRates[arr[0]] = arr[1];
 		});
 		return marketRates;
-		// return priceAndRisk.value.output_params.MarketRates;
 	} else {
 		return marketRates;
 	}
@@ -212,7 +211,7 @@ onUnmounted(() => {
 				<div class="dashboard__readonly readonly">
 					<div class="readonly__label">PortfolioNPV</div>
 					<div class="readonly__value">
-						{{ portfolioNPV.toFixed(2) }}ms
+						{{ portfolioNPV.toFixed(2) }}
 					</div>
 				</div>
 				<div class="dashboard__readonly readonly">
