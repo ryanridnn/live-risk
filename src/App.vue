@@ -62,10 +62,15 @@ const selectMenu = (menu) => {
 	margin: 0 auto;
 	min-height: 100vh;
 	padding-bottom: 4rem;
+
+	&,
+	& * {
+		font-family: "Inter", sans-serif;
+	}
 }
 
 .main {
-	margin-top: 2rem;
+	padding-top: 2rem;
 
 	&__tabs {
 		display: flex;
@@ -95,6 +100,66 @@ const selectMenu = (menu) => {
 		background: rgb(15 23 42);
 		padding: 2rem;
 		border-radius: 1rem;
+	}
+}
+
+input,
+button {
+	border: none;
+	background: none;
+}
+
+button:not(:disabled) {
+	cursor: pointer;
+}
+
+.heading {
+	display: inline-block;
+	font-weight: 600;
+	position: relative;
+}
+
+.heading::before {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 100%;
+	height: 2px;
+	background: linear-gradient(
+		90deg,
+		rgba(251, 191, 36, 1) 50%,
+		rgba(255, 255, 255, 1) 200%
+	);
+	border-radius: 0.25rem;
+}
+
+.progress {
+	height: 2.5rem;
+	background: rgb(240, 152, 5);
+	border-radius: 0.5rem;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+
+	&__text {
+		position: relative;
+		z-index: 1;
+		color: rgb(30, 41, 59);
+		font-weight: bold;
+	}
+
+	&__bar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		background: rgb(251, 191, 36);
+		border-top-right-radius: 0.375rem;
+		border-bottom-right-radius: 0.375rem;
+		transition: all 0.2s ease;
 	}
 }
 </style>
